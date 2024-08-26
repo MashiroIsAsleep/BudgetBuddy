@@ -16,18 +16,20 @@ struct ContentView: View {
             Color(UIColor.systemGray6)
                 .edgesIgnoringSafeArea(.all)
             
-            VStack {
+            VStack(alignment: .center, spacing: 16) {
                 HomeView(items: items)
-                HStack {
-                    Spacer()
-                    SpendingList(items: $items)
-                    Spacer()
-                }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                
+                SpendingList(items: $items)
+                    .frame(maxWidth: 400, alignment: .center)
+                
                 CustomTabBar(
                     showingNewSpendingSheet: $showingNewSpendingSheet,
                     showingSettingsSheet: $showingSettingsSheet
                 )
+                .frame(maxWidth: 420, alignment: .center)
             }
+            .padding(.horizontal, 16)
             .accentColor(.blue)
             .sheet(isPresented: $showingNewSpendingSheet) {
                 NewSpendingPopUpView(items: $items, highestItemNumber: $highestItemNumber, saveItems: saveItems)

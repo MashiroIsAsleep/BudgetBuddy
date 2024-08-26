@@ -1,5 +1,4 @@
 import SwiftUI
-
 struct NewSpendingPopUpView: View {
     @Binding var items: [SpendingItem]
     @Binding var highestItemNumber: Int
@@ -13,73 +12,91 @@ struct NewSpendingPopUpView: View {
     var saveItems: () -> Void
     
     var body: some View {
-        VStack {
-            Text("Add New Goal")
-                .font(.headline)
-                .padding()
-            
-            HStack {
+        NavigationView {
+            ZStack {
+                Color(UIColor.systemGray6)
+                    .edgesIgnoringSafeArea(.all)
                 VStack {
-                    Picker("Type", selection: $isIncome) {
-                        Text("Income").tag(true)
-                        Text("Spending").tag(false)
+                    HStack {
+                        VStack {
+                            Picker("Type", selection: $isIncome) {
+                                HStack {
+                                    Image(systemName: "arrow.up.circle")
+                                    Text("Gain")
+                                }
+                                .foregroundColor(.green)
+                                .tag(true)
+                                
+                                HStack {
+                                    Image(systemName: "arrow.down.circle")
+                                    Text("Spend")
+                                }
+                                .foregroundColor(.red)
+                                .tag(false)
+
+                            }
+                            .pickerStyle(WheelPickerStyle())
+                            .frame(width: 120, height: 100)
+                        }
+                        
+                        TextField("Enter amount", text: $amount)
+                            .frame(width: 180, height: 20)
+                            .keyboardType(.decimalPad)
+                            .padding()
+                            .background(Color(.white))
+                            .cornerRadius(15)
                     }
-                    .pickerStyle(WheelPickerStyle())
-                }
-                .frame(width: 120)
-                
-                TextField("Enter amount", text: $amount)
-                    .keyboardType(.decimalPad)
                     .padding()
-                    .border(Color.gray)
-            }
-            .padding()
-            
-            if !isIncome {
-                Picker("Select Label", selection: $selectedLabel) {
-                    ForEach(SpendingItem.Label.allCases.filter { $0 != .income }, id: \.self) { label in
-                        Text(label.rawValue.capitalized).tag(label)
+                    
+                    if !isIncome {
+                        Picker("Select Label", selection: $selectedLabel) {
+                            ForEach(SpendingItem.Label.allCases.filter { $0 != .income }, id: \.self) { label in
+                                Text(label.rawValue.capitalized)
+                                    .tag(label)
+                                    .foregroundColor(.white)
+                            }
+                        }
+                        .pickerStyle(SegmentedPickerStyle())
+                        .padding()
+                    }
+                    
+                    TextField("Enter comment", text: $comment)
+                        .frame(maxWidth: 310, minHeight: 40)
+                        .padding()
+                        .background(Color(.white))
+                        .cornerRadius(15)
+                    
+                    Spacer()
+                }
+                .padding()
+                .onChange(of: isIncome) { oldValue, newValue in
+                    if newValue {
+                        selectedLabel = .income // Automatically set label to income when Income is selected
                     }
                 }
-                .pickerStyle(SegmentedPickerStyle())
-                .padding()
             }
-            
-            TextField("Enter comment", text: $comment)
-                .padding()
-                .border(Color.gray)
-            
-            Button(action: {
-                if let amountValue = Float(amount) {
-                    let finalAmount = isIncome ? amountValue : -amountValue
-                    highestItemNumber += 1
-                    let newSpendingItem = SpendingItem(
-                        amount: finalAmount,
-                        label: selectedLabel,
-                        comment: comment,
-                        timeAdded: Date(),
-                        name: "Goal \(highestItemNumber)"
-                    )
-                    items.append(newSpendingItem)
-                    saveItems()
+            .navigationBarTitle("New Spending", displayMode: .inline)
+            .navigationBarItems(
+                leading: Button("Cancel") {
+                    presentationMode.wrappedValue.dismiss()
+                },
+                trailing: Button("Add") {
+                    if let amountValue = Float(amount) {
+                        let finalAmount = isIncome ? amountValue : -amountValue
+                        highestItemNumber += 1
+                        let newSpendingItem = SpendingItem(
+                            amount: finalAmount,
+                            label: selectedLabel,
+                            comment: comment,
+                            timeAdded: Date(),
+                            name: "Goal \(highestItemNumber)"
+                        )
+                        items.append(newSpendingItem)
+                        saveItems()
+                    }
+                    presentationMode.wrappedValue.dismiss()
                 }
-                presentationMode.wrappedValue.dismiss()
-            }) {
-                Text("Add Goal")
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
-            }
-            .padding()
-            
-            Spacer()
-        }
-        .padding()
-        .onChange(of: isIncome) { oldValue, newValue in
-            if newValue {
-                selectedLabel = .income // Automatically set label to income when Income is selected
-            }
+            )
         }
     }
 }

@@ -31,10 +31,23 @@ struct SpendingList: View {
                         ForEach(groupedItems[key]!.sorted(by: { $0.timeAdded > $1.timeAdded })) { item in
                             HStack {
                                 Text("\(item.timeAdded, formatter: itemFormatter)")
-                                Spacer()
-                                Text(String(format: "%.2f", item.amount) + "$")
-                                Spacer()
+                                    .frame(maxWidth: 70, alignment: .leading)
+                                
                                 Text(item.label.rawValue.capitalized)
+                                    .bold()
+                                    .frame(maxWidth: .infinity)
+                                
+                                
+                                Text(String(format: "%.2f", item.amount) + "$")
+                                    .padding(.leading, 8)
+                                    .padding(.trailing, 8)
+                                    .padding(.top, 4)
+                                    .padding(.bottom, 4)
+                                    .background(item.amount > 0 ? Color.green.opacity(0.7) : Color.red.opacity(0.7))
+                                    .cornerRadius(8)
+                                    .multilineTextAlignment(.trailing) // Aligns the text within its frame
+                                    .frame(maxWidth: .infinity, alignment: .trailing)
+
                             }
                             .onTapGesture {
                                 selectedSpendingItem = item
