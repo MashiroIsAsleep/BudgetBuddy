@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SpendingList: View {
     @Binding var items: [SpendingItem]
+    @State private var selectedSpendingItem: SpendingItem? = nil
     
     var groupedItems: [String: [SpendingItem]] {
         Dictionary(grouping: items) { item in
@@ -24,6 +25,9 @@ struct SpendingList: View {
                     Section(header: Text(key)) {
                         ForEach(groupedItems[key]!.sorted(by: { $0.timeAdded > $1.timeAdded })) { item in
                             Text(item.name)
+                                .onTapGesture {
+                                    selectedSpendingItem = item
+                                }
                         }
                     }
                 }
@@ -31,8 +35,29 @@ struct SpendingList: View {
             .background(Color(UIColor.systemGray6))
             .scrollContentBackground(.hidden)
             .navigationBarTitle("Items List")
+            .sheet(item: $selectedSpendingItem) { item in
+                SpendingItemDetailView(spendingItem: item)
+            }
         }
         .background(Color(UIColor.systemGray6))
+    }
+}
+
+struct SpendingItemDetailView: View {
+    let spendingItem: SpendingItem
+
+    var body: some View {
+        VStack {
+            Text(spendingItem.name)
+                .font(.largeTitle)
+                .padding()
+
+            // Add more details here about the SpendingItem
+            Spacer() // To push the content to the top
+        }
+        .padding()
+        .presentationDetents([.medium, .large]) // Optional: Allows you to control the size of the sheet
+        .presentationDragIndicator(.visible) // Optional: Adds a drag indicator
     }
 }
 
