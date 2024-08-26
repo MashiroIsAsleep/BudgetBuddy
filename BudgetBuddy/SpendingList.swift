@@ -123,9 +123,8 @@ struct SpendingItemDetailView: View {
 }
 
 
-enum SpendingLabel: String, Codable, CaseIterable {
-    case a, b, c
-}
+
+
 
 
 struct SpendingItem: Identifiable, Codable {
@@ -137,7 +136,7 @@ struct SpendingItem: Identifiable, Codable {
     let name: String
     
     enum Label: String, Codable, CaseIterable {
-        case a, b, c
+        case a, b, c, income
     }
     
     // Custom CodingKeys to handle encoding/decoding
