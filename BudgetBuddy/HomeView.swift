@@ -1,14 +1,19 @@
 import SwiftUI
 
 struct HomeView: View {
+    let items: [SpendingItem]
+    
     var body: some View {
+        let totalAmount = items.reduce(0) { $0 + $1.amount }
+        let todayAmount = items.filter { Calendar.current.isDateInToday($0.timeAdded) }.reduce(0) { $0 + $1.amount }
+
         VStack(spacing: 20) {
             HStack(spacing: 20) {
-                DashboardItemView(iconName: "calendar.circle.fill", iconColor: .blue, title: "Today", count: "0")
+                DashboardItemView(iconName: "calendar.circle.fill", iconColor: .blue, title: "Today", count: String(format: "%.2f", todayAmount))
                 DashboardItemView(iconName: "calendar.badge.clock", iconColor: .red, title: "Scheduled", count: "0")
             }
             HStack(spacing: 20) {
-                DashboardItemView(iconName: "tray.circle.fill", iconColor: .black, title: "All", count: "0")
+                DashboardItemView(iconName: "tray.circle.fill", iconColor: .black, title: "All", count: String(format: "%.2f", totalAmount))
                 DashboardItemView(iconName: "checkmark.circle.fill", iconColor: .gray, title: "Completed", count: "0")
             }
         }
