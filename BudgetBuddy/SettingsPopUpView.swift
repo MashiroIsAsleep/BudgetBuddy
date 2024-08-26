@@ -1,8 +1,10 @@
-//
-//  SettingsPopUpView.swift
-//  BudgetBuddy
-//
-//  Created by paraconnect on 8/25/24.
-//
+import SwiftUI
 
-import Foundation
+struct SettingsPopUpView: View {
+    var body: some View {
+        VStack {
+            Text("Goals List")
+        }
+        .padding()
+    }
+}
