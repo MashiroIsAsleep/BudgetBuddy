@@ -23,10 +23,15 @@ struct SpendingList: View {
         }
     }
     
+    var sortedSectionKeys: [String] {
+        let sectionOrder = ["Today", "This Week", "This Month", "Earlier"]
+        return sectionOrder.filter { groupedItems[$0] != nil }
+    }
+    
     var body: some View {
         NavigationView {
             List {
-                ForEach(Array(groupedItems.keys.sorted()), id: \.self) { key in
+                ForEach(sortedSectionKeys, id: \.self) { key in
                     Section(header: Text(key)) {
                         ForEach(groupedItems[key]!.sorted(by: { $0.timeAdded > $1.timeAdded })) { item in
                             HStack {
@@ -37,7 +42,6 @@ struct SpendingList: View {
                                     .bold()
                                     .frame(maxWidth: .infinity)
                                 
-                                
                                 Text(String(format: "%.2f", item.amount) + "$")
                                     .padding(.leading, 8)
                                     .padding(.trailing, 8)
@@ -45,9 +49,8 @@ struct SpendingList: View {
                                     .padding(.bottom, 4)
                                     .background(item.amount > 0 ? Color.green.opacity(0.7) : Color.red.opacity(0.7))
                                     .cornerRadius(8)
-                                    .multilineTextAlignment(.trailing) // Aligns the text within its frame
+                                    .multilineTextAlignment(.trailing)
                                     .frame(maxWidth: .infinity, alignment: .trailing)
-
                             }
                             .onTapGesture {
                                 selectedSpendingItem = item
@@ -103,6 +106,7 @@ private let itemFormatter: DateFormatter = {
     formatter.dateFormat = "MMM d, HH:mm"
     return formatter
 }()
+
 
 
 
