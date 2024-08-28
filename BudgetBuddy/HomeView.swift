@@ -2,9 +2,8 @@ import SwiftUI
 
 struct HomeView: View {
     let items: [SpendingItem]
-    
-    @State private var selectedCategory: SpendingItem.Label = .a // Default category
-    @State private var spendingLimit: Float = 0
+    @Binding var selectedCategory: SpendingItem.Label
+    @Binding var spendingLimit: Float
     
     var body: some View {
         let totalAmount = items.reduce(0) { $0 + $1.amount }
@@ -24,27 +23,8 @@ struct HomeView: View {
         }
         .padding(.horizontal, 40)
         .padding(.top, 24)
-        .onAppear(perform: loadSettings) // Load settings when the view appears
-        .onChange(of: selectedCategory) { _ in
-            // Update view when the selected category changes
-            loadSettings()
-        }
     }
-    
-    // Load selected category and spending limit from UserDefaults
-    private func loadSettings() {
-        if let savedCategory = UserDefaults.standard.string(forKey: "selectedCategory"),
-           let category = SpendingItem.Label(rawValue: savedCategory) {
-            selectedCategory = category
-        }
-        
-        if let savedLimit = UserDefaults.standard.string(forKey: "spendingLimit"),
-           let limit = Float(savedLimit) {
-            spendingLimit = limit
-        }
-    }
-    
-    // Calculate total spending for the selected category in the current week
+
     private func calculateWeeklySpending(for category: SpendingItem.Label, in items: [SpendingItem]) -> Float {
         let currentWeek = Calendar.current.component(.weekOfYear, from: Date())
         let currentYear = Calendar.current.component(.year, from: Date())
@@ -56,6 +36,7 @@ struct HomeView: View {
         }.reduce(0) { $0 + $1.amount }
     }
 }
+
 
 
 struct DashboardItemView: View {

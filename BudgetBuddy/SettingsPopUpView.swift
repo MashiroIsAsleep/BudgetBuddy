@@ -3,8 +3,8 @@ import SwiftUI
 struct SettingsPopUpView: View {
     @Environment(\.presentationMode) var presentationMode // For dismissing the view
     
-    @State private var selectedCategory: SpendingItem.Label = .a // Default category
-    @State private var spendingLimit: String = ""
+    @Binding var selectedCategory: SpendingItem.Label
+    @Binding var spendingLimit: Float
     @State private var emailAddresses: [String] = [""] // Start with one empty email field
     
     var body: some View {
@@ -26,9 +26,12 @@ struct SettingsPopUpView: View {
                 // Spending Limit Input
                 HStack {
                     Text("Weekly Limit:")
-                    TextField("Enter amount", text: $spendingLimit)
-                        .keyboardType(.decimalPad)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                    TextField("Enter amount", text: Binding(
+                        get: { String(spendingLimit) },
+                        set: { spendingLimit = Float($0) ?? 0 }
+                    ))
+                    .keyboardType(.decimalPad)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
                 }
                 .padding()
                 
@@ -73,6 +76,7 @@ struct SettingsPopUpView: View {
                 
                 // Save Button
                 Button(action: {
+                    // Settings are already updated in real-time via bindings
                     saveSettings()
                     presentationMode.wrappedValue.dismiss()
                 }) {
@@ -88,32 +92,11 @@ struct SettingsPopUpView: View {
             }
             .padding()
             .navigationBarHidden(true) // Hide the default navigation bar
-            .onAppear {
-                loadSettings() // Load the settings when the view appears
-            }
         }
     }
     
-    // Save the settings to UserDefaults
     private func saveSettings() {
         UserDefaults.standard.set(selectedCategory.rawValue, forKey: "selectedCategory")
         UserDefaults.standard.set(spendingLimit, forKey: "spendingLimit")
-        UserDefaults.standard.set(emailAddresses, forKey: "emailAddresses")
-    }
-    
-    // Load the settings from UserDefaults
-    private func loadSettings() {
-        if let savedCategory = UserDefaults.standard.string(forKey: "selectedCategory"),
-           let category = SpendingItem.Label(rawValue: savedCategory) {
-            selectedCategory = category
-        }
-        
-        spendingLimit = UserDefaults.standard.string(forKey: "spendingLimit") ?? ""
-        
-        if let savedEmails = UserDefaults.standard.stringArray(forKey: "emailAddresses") {
-            emailAddresses = savedEmails.isEmpty ? [""] : savedEmails
-        } else {
-            emailAddresses = [""]
-        }
     }
 }

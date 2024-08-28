@@ -10,6 +10,10 @@ struct ContentView: View {
         }
     }
     @State private var highestItemNumber = 0
+    
+    // New State properties for selected category and spending limit
+    @State private var selectedCategory: SpendingItem.Label = .a
+    @State private var spendingLimit: Float = 0
 
     var body: some View {
         ZStack {
@@ -17,7 +21,7 @@ struct ContentView: View {
                 .edgesIgnoringSafeArea(.all)
             
             VStack(alignment: .center, spacing: 16) {
-                HomeView(items: items)
+                HomeView(items: items, selectedCategory: $selectedCategory, spendingLimit: $spendingLimit)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 
                 SpendingList(items: $items)
@@ -35,11 +39,12 @@ struct ContentView: View {
                 NewSpendingPopUpView(items: $items, highestItemNumber: $highestItemNumber, saveItems: saveItems)
             }
             .sheet(isPresented: $showingSettingsSheet) {
-                SettingsPopUpView()
+                SettingsPopUpView(selectedCategory: $selectedCategory, spendingLimit: $spendingLimit)
             }
         }
         .onAppear {
             loadItems()
+            loadSettings()
             updateHighestItemNumber()
         }
     }
@@ -62,6 +67,25 @@ struct ContentView: View {
             if let decodedItems = try? JSONDecoder().decode([SpendingItem].self, from: savedItems) {
                 items = decodedItems
             }
+        }
+    }
+    
+    // Save the settings to UserDefaults
+    private func saveSettings() {
+        UserDefaults.standard.set(selectedCategory.rawValue, forKey: "selectedCategory")
+        UserDefaults.standard.set(spendingLimit, forKey: "spendingLimit")
+    }
+    
+    // Load the settings from UserDefaults
+    private func loadSettings() {
+        if let savedCategory = UserDefaults.standard.string(forKey: "selectedCategory"),
+           let category = SpendingItem.Label(rawValue: savedCategory) {
+            selectedCategory = category
+        }
+        
+        if let savedLimit = UserDefaults.standard.string(forKey: "spendingLimit"),
+           let limit = Float(savedLimit) {
+            spendingLimit = limit
         }
     }
 }
