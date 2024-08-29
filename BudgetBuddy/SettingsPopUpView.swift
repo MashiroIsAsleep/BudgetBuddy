@@ -76,7 +76,6 @@ struct SettingsPopUpView: View {
                 
                 // Save Button
                 Button(action: {
-                    // Settings are already updated in real-time via bindings
                     saveSettings()
                     presentationMode.wrappedValue.dismiss()
                 }) {
@@ -92,11 +91,26 @@ struct SettingsPopUpView: View {
             }
             .padding()
             .navigationBarHidden(true) // Hide the default navigation bar
+            .onAppear {
+                loadSettings() // Load settings when the view appears
+            }
         }
     }
     
     private func saveSettings() {
         UserDefaults.standard.set(selectedCategory.rawValue, forKey: "selectedCategory")
         UserDefaults.standard.set(spendingLimit, forKey: "spendingLimit")
+        UserDefaults.standard.set(emailAddresses, forKey: "emailAddresses") // Save email addresses
+    }
+    
+    private func loadSettings() {
+        if let savedCategory = UserDefaults.standard.string(forKey: "selectedCategory"),
+           let category = SpendingItem.Label(rawValue: savedCategory) {
+            selectedCategory = category
+        }
+        
+        spendingLimit = UserDefaults.standard.float(forKey: "spendingLimit")
+        
+        emailAddresses = UserDefaults.standard.stringArray(forKey: "emailAddresses") ?? [""]
     }
 }
