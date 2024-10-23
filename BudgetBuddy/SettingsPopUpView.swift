@@ -13,8 +13,8 @@ struct SettingsPopUpView: View {
                 Text("Track Spending")
                     .font(.largeTitle)
                     .padding(.top, 20)
-                
                 // Category Picker
+                //*Needs an add button here on the right side of category picker.
                 Picker("Select Category", selection: $selectedCategory) {
                     ForEach(SpendingItem.Label.allCases.filter { $0 != .income }, id: \.self) { label in
                         Text(label.rawValue.capitalized).tag(label)
@@ -24,6 +24,7 @@ struct SettingsPopUpView: View {
                 .padding()
 
                 // Spending Limit Input
+                // Limit should varie for each spending item. Save the limit whenever user changes selection for spending item
                 HStack {
                     Text("Weekly Limit:")
                     TextField("Enter amount", text: Binding(

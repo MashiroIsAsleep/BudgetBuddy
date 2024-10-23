@@ -140,10 +140,6 @@ struct SpendingItemDetailView: View {
 }
 
 
-
-
-
-
 struct SpendingItem: Identifiable, Codable {
     let id: UUID
     let amount: Float
@@ -152,6 +148,8 @@ struct SpendingItem: Identifiable, Codable {
     let timeAdded: Date
     let name: String
     
+    
+    // *Need function here to customize spending item
     enum Label: String, Codable, CaseIterable {
         case a, b, c, income
     }

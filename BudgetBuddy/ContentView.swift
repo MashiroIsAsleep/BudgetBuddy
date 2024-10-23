@@ -21,6 +21,7 @@ struct ContentView: View {
                 .edgesIgnoringSafeArea(.all)
             
             VStack(alignment: .center, spacing: 16) {
+                
                 HomeView(items: items, selectedCategory: $selectedCategory, spendingLimit: $spendingLimit)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 
