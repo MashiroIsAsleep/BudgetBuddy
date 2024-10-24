@@ -122,8 +122,7 @@ struct NewSpendingPopUpView: View {
                             amount: finalAmount,
                             label: selectedLabel,
                             comment: comment,
-                            timeAdded: Date(),
-                            name: "Goal \(highestItemNumber)"
+                            timeAdded: Date()
                         )
                         items.append(newSpendingItem)
                         saveItems()

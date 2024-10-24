@@ -115,29 +115,80 @@ struct SpendingItemDetailView: View {
     let spendingItem: SpendingItem
 
     var body: some View {
-        VStack {
-            Text(spendingItem.name)
-                .font(.largeTitle)
-                .padding()
+        VStack(alignment: .leading, spacing: 16) {
+            // Title: Spending/Earning Name
+            HStack {
+                Image(systemName: spendingItem.amount > 0 ? "arrow.up.circle.fill" : "arrow.down.circle.fill")
+                    .font(.largeTitle)
+                    .foregroundColor(spendingItem.amount > 0 ? .green : .red)
+                Text(spendingItem.name)
+                    .font(.largeTitle)
+                    .bold()
+                    .padding(.leading, 8)
+            }
+            .padding(.top)
             
-            Text(String(format: "%.2f", spendingItem.amount))
-                .font(.title2)
-                .padding()
-
-            Text(spendingItem.label.rawValue.capitalized)
-                .font(.headline)
-                .padding()
-
-            Text(spendingItem.comment)
-                .padding()
-
+            Divider()
+            
+            // Amount Section
+            HStack {
+                Image(systemName: "dollarsign.circle.fill")
+                    .foregroundColor(.green)
+                Text("Amount:")
+                    .font(.title3)
+                    .bold()
+                Spacer()
+                Text(String(format: "%.2f$", spendingItem.amount))
+                    .font(.title3)
+                    .foregroundColor(spendingItem.amount > 0 ? .green : .red)
+            }
+            .padding(.vertical, 8)
+            
+            Divider()
+            
+            // Category Label Section
+            HStack {
+                Image(systemName: "tag.fill")
+                    .foregroundColor(.blue)
+                Text("Category:")
+                    .font(.title3)
+                    .bold()
+                Spacer()
+                Text(spendingItem.label.rawValue.capitalized)
+                    .font(.title3)
+            }
+            .padding(.vertical, 8)
+            
+            Divider()
+            
+            // Comment Section
+            if !spendingItem.comment.isEmpty {
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Image(systemName: "text.bubble.fill")
+                            .foregroundColor(.gray)
+                        Text("Comment:")
+                            .font(.title3)
+                            .bold()
+                    }
+                    Text(spendingItem.comment)
+                        .font(.body)
+                        .foregroundColor(.secondary)
+                        .padding(.leading, 30) // Add a little indentation for comments
+                }
+            }
+            
             Spacer()
         }
         .padding()
-        .presentationDetents([.medium, .large]) // Optional: Allows you to control the size of the sheet
-        .presentationDragIndicator(.visible) // Optional: Adds a drag indicator
+        .background(Color(UIColor.systemGray6))
+        .cornerRadius(12)
+        .shadow(radius: 10)
+        .presentationDetents([.medium, .large]) // Allows you to control the size of the sheet
+        .presentationDragIndicator(.visible) // Adds a drag indicator
     }
 }
+
 
 
 struct SpendingItem: Identifiable, Codable {
@@ -147,9 +198,7 @@ struct SpendingItem: Identifiable, Codable {
     let comment: String
     let timeAdded: Date
     let name: String
-    
-    
-    // *Need function here to customize spending item
+
     enum Label: String, Codable, CaseIterable {
         case a, b, c, income
     }
@@ -169,17 +218,25 @@ struct SpendingItem: Identifiable, Codable {
         self.timeAdded = try container.decode(Date.self, forKey: .timeAdded)
         self.name = try container.decode(String.self, forKey: .name)
     }
-    
+
     // Default init
-    init(id: UUID = UUID(), amount: Float, label: Label, comment: String, timeAdded: Date, name: String) {
+    init(id: UUID = UUID(), amount: Float, label: Label, comment: String, timeAdded: Date) {
         self.id = id
         self.amount = amount
         self.label = label
         self.comment = comment
         self.timeAdded = timeAdded
-        self.name = name
+        
+        // Generate a name based on the amount (spending/earning) and timeAdded
+        let timeString = DateFormatter.localizedString(from: timeAdded, dateStyle: .medium, timeStyle: .short)
+        if amount > 0 {
+            self.name = "Earning at \(timeString)"
+        } else {
+            self.name = "Spending at \(timeString)"
+        }
     }
 }
+
 
 
 

@@ -51,8 +51,14 @@ struct HomeView: View {
                             }
                         }
                 } else if selectedBox == 1{
-                    //incorporate the budget struct
-                } else if selectedBox == 2 || selectedBox == 3 {
+                    ExpandedBudgetView(budget: spendingLimit, totalSpent: calculateWeeklySpending(for: selectedCategory, in: items), remainingBudget: scheduledAmount)
+                        .transition(.move(edge: .bottom))
+                        .zIndex(1)
+                        .onTapGesture {
+                            withAnimation {
+                                expandedBox = nil // Collapse on tap
+                            }
+                        }                } else if selectedBox == 2 || selectedBox == 3 {
                     // Display a bar chart of 7-day income or spending
                     ExpandedBarChartView(items: items, isIncome: selectedBox == 2)
                         .transition(.move(edge: .bottom)) // Transition effect
@@ -132,41 +138,67 @@ struct HomeView: View {
     }
 }
 
+import SwiftUI
+
+// Define itemFormatter at the file scope
+private let itemFormatter: DateFormatter = {
+    let formatter = DateFormatter()
+    formatter.dateStyle = .medium
+    formatter.timeStyle = .short
+    return formatter
+}()
+
 struct ExpandedTodayListView: View {
     let items: [SpendingItem]
     
     var body: some View {
-        VStack {
+        VStack(alignment: .leading, spacing: 16) {
+            // Title
             Text("Transactions Today")
-                .font(.headline)
-                .padding()
+                .font(.title)
+                .fontWeight(.bold)
+                .padding(.top)
             
-            List {
+            Divider()
+            
+            // Transaction List
+            ScrollView {
                 ForEach(items.filter { Calendar.current.isDateInToday($0.timeAdded) }) { item in
                     HStack {
-                        Text(item.name)
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(item.name)
+                                .font(.headline)
+                            // Use itemFormatter to format the timeAdded property
+                            Text("\(item.timeAdded, formatter: itemFormatter)")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                        }
                         Spacer()
-                        Text(String(format: "%.2f", item.amount))
+                        Text(String(format: "%.2f$", item.amount))
+                            .font(.headline)
+                            .foregroundColor(item.amount > 0 ? .green : .red)
+                            .padding(8)
+                            .background(item.amount > 0 ? Color.green.opacity(0.1) : Color.red.opacity(0.1))
+                            .cornerRadius(8)
                     }
+                    .padding(.vertical, 8)
                 }
             }
-            .frame(height: 300) // Adjust height as needed
+            .frame(maxHeight: 300) // Limit height of the scrollable area
         }
-        .background(Color.white)
+        .padding()
+        .background(Color(UIColor.systemBackground))
         .cornerRadius(16)
         .shadow(radius: 10)
         .padding()
     }
 }
 
+
 struct ExpandedBarChartView: View {
     let items: [SpendingItem]
     let isIncome: Bool
-    let linearGradient = LinearGradient(gradient: Gradient(colors: [Color.accentColor.opacity(0.4), Color.accentColor.opacity(0)]),
-                                        startPoint: .top,
-                                        endPoint: .bottom)
 
-    // Generate last 7 days' data
     var last7DaysData: [(String, Float)] {
         var data: [(String, Float)] = []
         let calendar = Calendar.current
@@ -177,7 +209,7 @@ struct ExpandedBarChartView: View {
             }.reduce(0) { $0 + $1.amount }
             data.append((formattedDate(date), totalForDay))
         }
-        return data.reversed() // Show in correct order
+        return data.reversed()
     }
 
     func formattedDate(_ date: Date) -> String {
@@ -187,29 +219,40 @@ struct ExpandedBarChartView: View {
     }
 
     var body: some View {
-        VStack {
-            Text(isIncome ? "Income Over the Last 7 Days" : "Spending Over the Last 7 Days")
-                .font(.headline)
-                .padding()
+        let lineColor = isIncome ? Color.green : Color.red
+        let gradient = LinearGradient(
+            gradient: Gradient(colors: [lineColor.opacity(0.5), lineColor.opacity(0)]),
+            startPoint: .top,
+            endPoint: .bottom
+        )
+
+        VStack(alignment: .leading, spacing: 16) {
+            // Title
+            Text(isIncome ? "Weekly Earnings" : "Weeklu Spendings")
+                .font(.title)
+                .fontWeight(.bold)
+                .padding(.top)
             
+            Divider()
+            
+            // Chart
             Chart(last7DaysData, id: \.0) { day, value in
-                // Add AreaMark to fill space below the line
                 AreaMark(
                     x: .value("Day", day),
                     y: .value("Total", value)
                 )
-                .foregroundStyle(linearGradient)
+                .foregroundStyle(gradient)
                 
-                // LineMark for the actual line
                 LineMark(
                     x: .value("Day", day),
                     y: .value("Total", value)
                 )
-                .foregroundStyle(isIncome ? .green : .red)
+                .foregroundStyle(lineColor)
             }
             .frame(height: 300) // Adjust chart height as needed
         }
-        .background(Color.white)
+        .padding()
+        .background(Color(UIColor.systemBackground))
         .cornerRadius(16)
         .shadow(radius: 10)
         .padding()
@@ -217,9 +260,77 @@ struct ExpandedBarChartView: View {
 }
 
 
-//struct ExpandedBudgetView: View {
-//    
-//}
+
+struct ExpandedBudgetView: View {
+    let budget: Float // Total budget for the selected category
+    let totalSpent: Float // Total amount spent for the selected category
+    let remainingBudget: Float // Remaining budget for the selected category
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            // Title
+            Text("Budget Overview")
+                .font(.title)
+                .fontWeight(.bold)
+                .padding(.top)
+            
+            Divider()
+
+            // Budget Display
+            HStack {
+                Image(systemName: "creditcard.fill")
+                    .foregroundColor(.blue)
+                Text("Total Budget:")
+                    .font(.title3)
+                    .bold()
+                Spacer()
+                Text(String(format: "%.2f$", budget))
+                    .font(.title3)
+            }
+            .padding(.vertical, 8)
+
+            Divider()
+
+            // Total Spent Display
+            HStack {
+                Image(systemName: "arrow.down.circle.fill")
+                    .foregroundColor(.red)
+                Text("Total Spent:")
+                    .font(.title3)
+                    .bold()
+                Spacer()
+                Text(String(format: "%.2f$", totalSpent))
+                    .font(.title3)
+                    .foregroundColor(.red)
+            }
+            .padding(.vertical, 8)
+
+            Divider()
+
+            // Remaining Budget Display
+            HStack {
+                Image(systemName: remainingBudget >= 0 ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
+                    .foregroundColor(remainingBudget >= 0 ? .green : .yellow)
+                Text("Remaining Budget:")
+                    .font(.title3)
+                    .bold()
+                Spacer()
+                Text(String(format: "%.2f$", remainingBudget))
+                    .font(.title3)
+                    .foregroundColor(remainingBudget >= 0 ? .green : .red)
+            }
+            .padding(.vertical, 8)
+            
+            Spacer()
+        }
+        .padding()
+        .background(Color(UIColor.systemBackground))
+        .cornerRadius(16)
+        .shadow(radius: 10)
+        .padding()
+    }
+}
+
 struct DashboardItemView: View {
     @Environment(\.colorScheme) var colorScheme
     
