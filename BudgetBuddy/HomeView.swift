@@ -50,6 +50,8 @@ struct HomeView: View {
                                 expandedBox = nil // Collapse on tap
                             }
                         }
+                } else if selectedBox == 1{
+                    //incorporate the budget struct
                 } else if selectedBox == 2 || selectedBox == 3 {
                     // Display a bar chart of 7-day income or spending
                     ExpandedBarChartView(items: items, isIncome: selectedBox == 2)
@@ -160,6 +162,9 @@ struct ExpandedTodayListView: View {
 struct ExpandedBarChartView: View {
     let items: [SpendingItem]
     let isIncome: Bool
+    let linearGradient = LinearGradient(gradient: Gradient(colors: [Color.accentColor.opacity(0.4), Color.accentColor.opacity(0)]),
+                                        startPoint: .top,
+                                        endPoint: .bottom)
 
     // Generate last 7 days' data
     var last7DaysData: [(String, Float)] {
@@ -188,7 +193,15 @@ struct ExpandedBarChartView: View {
                 .padding()
             
             Chart(last7DaysData, id: \.0) { day, value in
-                BarMark(
+                // Add AreaMark to fill space below the line
+                AreaMark(
+                    x: .value("Day", day),
+                    y: .value("Total", value)
+                )
+                .foregroundStyle(linearGradient)
+                
+                // LineMark for the actual line
+                LineMark(
                     x: .value("Day", day),
                     y: .value("Total", value)
                 )
@@ -203,6 +216,10 @@ struct ExpandedBarChartView: View {
     }
 }
 
+
+//struct ExpandedBudgetView: View {
+//    
+//}
 struct DashboardItemView: View {
     @Environment(\.colorScheme) var colorScheme
     
